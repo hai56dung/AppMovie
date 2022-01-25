@@ -14,6 +14,7 @@ export type OtpModalRef = {
 export type OtpModalProps = {
   code: string;
   setCode: React.Dispatch<React.SetStateAction<string>>;
+  confirmCode: () => {};
 };
 interface ICode {
   inputRef: React.MutableRefObject<TextInput>;
@@ -61,7 +62,11 @@ const OtpModal = React.forwardRef<OtpModalRef, OtpModalProps>((props, ref) => {
               return <Code inputRef={inputRef} value={item} />;
             })}
           </View>
-          <TouchableOpacity style={styles.btn}>
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={() => {
+              props.confirmCode();
+            }}>
             <Text style={styles.btnText}>Submit</Text>
           </TouchableOpacity>
         </View>

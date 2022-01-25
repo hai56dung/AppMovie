@@ -10,11 +10,48 @@ import {
 } from 'react-native';
 import React from 'react';
 import OtpModal, { OtpModalRef } from './OtpModal';
-
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { useAppDispatch, useAppSelector } from '../../controller/store';
+import { IUserState, setUser } from '../../controller/userSlice';
 const LoginScreen = () => {
   const modalRef = React.useRef() as React.MutableRefObject<OtpModalRef>;
   const inputRef = React.useRef() as React.MutableRefObject<TextInput>;
+  const [phoneNumber, setPhoneNumber] = React.useState('');
+  const [confirm, setConfirm] = React.useState<FirebaseAuthTypes.ConfirmationResult>();
   const [code, setCode] = React.useState('');
+  const dispatch = useAppDispatch();
+  const userSlice = useAppSelector((state) => state.userSlice);
+  async function signInWithPhoneNumber(phoneNumber: string) {
+    auth()
+      .signInWithPhoneNumber(phoneNumber)
+      .then((confirmation) => {
+        setConfirm(confirmation);
+        modalRef.current.show();
+      })
+      .catch((e) => console.log(e));
+  }
+
+  async function confirmCode() {
+    confirm
+      ?.confirm(code)
+      .then((res) => {
+        if (!res || !res.additionalUserInfo || !res.user) return;
+        const userInfor: IUserState = {
+          user: {
+            name: '',
+            photoUrl: '',
+            phoneNumber: '',
+            uid: res.user.uid,
+          },
+          auth: {
+            isNewUser: res.additionalUserInfo.isNewUser,
+          },
+        };
+        dispatch(setUser(userInfor));
+      })
+      .catch((e) => console.log('Invalid code.'));
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -32,18 +69,25 @@ const LoginScreen = () => {
             <View style={styles.form}>
               <Text style={styles.formTitle}>PHONE NUMBER</Text>
               <View style={styles.formInput}>
-                <TextInput ref={inputRef} placeholder="+84123456789" keyboardType="phone-pad" />
+                <TextInput
+                  ref={inputRef}
+                  placeholder="+84123456789"
+                  keyboardType="phone-pad"
+                  onChangeText={(value) => {
+                    setPhoneNumber(value);
+                  }}
+                />
               </View>
             </View>
             <TouchableOpacity
               style={styles.btn}
               onPress={() => {
-                modalRef.current.show();
+                signInWithPhoneNumber(phoneNumber);
               }}>
               <Text style={styles.btnText}>Request OTP</Text>
             </TouchableOpacity>
           </View>
-          <OtpModal ref={modalRef} code={code} setCode={setCode} />
+          <OtpModal ref={modalRef} code={code} setCode={setCode} confirmCode={confirmCode} />
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
