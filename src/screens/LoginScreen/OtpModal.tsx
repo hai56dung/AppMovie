@@ -63,22 +63,40 @@ const OtpModal = React.forwardRef<OtpModalRef, OtpModalProps>((props, ref) => {
             })}
           </View>
           <TouchableOpacity
-            style={styles.btn}
+            style={[
+              styles.btn,
+              {
+                backgroundColor: props.code.length == 6 ? '#1ED760' : '#EDEDED',
+              },
+            ]}
             onPress={() => {
+              if (props.code.length < 6) return;
+              setVisible(false);
               props.confirmCode();
             }}>
-            <Text style={styles.btnText}>Submit</Text>
+            <Text
+              style={[
+                styles.btnText,
+                {
+                  color: props.code.length == 6 ? '#fff' : '#9f9f9f',
+                },
+              ]}>
+              Submit
+            </Text>
           </TouchableOpacity>
         </View>
+        <TextInput
+          style={{
+            opacity: 0,
+          }}
+          maxLength={6}
+          keyboardType="number-pad"
+          onChangeText={(value) => {
+            props.setCode(value);
+          }}
+          ref={inputRef}
+        />
       </TouchableOpacity>
-      <TextInput
-        maxLength={6}
-        keyboardType="number-pad"
-        onChangeText={(value) => {
-          props.setCode(value);
-        }}
-        ref={inputRef}
-      />
     </Modal>
   );
 });
@@ -119,12 +137,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1ED760',
     borderRadius: 5,
   },
   btnText: {
     fontSize: 16,
-    color: '#FFF',
     fontWeight: '700',
   },
 });
