@@ -14,13 +14,16 @@ import React from 'react';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from 'App';
 import { ImageLibraryOptions, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useAppSelector } from '../../controller/store';
+import ModalLoader, { LoaderModalRef } from '../../components/app-modal-loader';
 const SetupAccountScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [photoUri, setPhotoUri] = React.useState('');
+  const loaderModalRef = React.useRef() as React.MutableRefObject<LoaderModalRef>;
   const userInfor = useAppSelector((state) => state.userSlice);
   const pickupPhoto = () => {
     const options: ImageLibraryOptions = {
@@ -36,6 +39,9 @@ const SetupAccountScreen = () => {
       }
     });
   };
+  navigation.addListener('beforeRemove', (e) => {
+    auth().signOut();
+  });
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -98,12 +104,13 @@ const SetupAccountScreen = () => {
               ]}
               onPress={() => {
                 if (firstName && lastName && photoUri) {
+                  loaderModalRef.current.show();
                   firestore()
                     .collection('user')
                     .doc(userInfor.user.uid)
                     .get()
                     .then((res) => res.data())
-                    .then((data) => {      
+                    .then((data) => {
                       const updateUser = {
                         user: {
                           ...data?.user,
@@ -114,10 +121,10 @@ const SetupAccountScreen = () => {
                           isNewUser: false,
                         },
                       };
-                      console.log(updateUser);
                       firestore().collection('user').doc(userInfor.user.uid).update(updateUser);
                     })
                     .then(() => {
+                      loaderModalRef.current.hide();
                       navigation.navigate('Home');
                     });
                 }
@@ -135,6 +142,7 @@ const SetupAccountScreen = () => {
           </View>
         </View>
       </TouchableWithoutFeedback>
+      <ModalLoader ref={loaderModalRef} size={'large'} color={'#1ED760'} />
     </KeyboardAvoidingView>
   );
 };

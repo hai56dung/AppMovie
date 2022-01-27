@@ -1,4 +1,5 @@
 import {
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -35,10 +36,13 @@ const LoginScreen = () => {
   const userInfor = useAppSelector((state) => state.userSlice);
 
   async function signInWithPhoneNumber(phoneNumber: string) {
+    loaderModalRef.current.show();
     auth()
       .signInWithPhoneNumber(phoneNumber)
       .then((confirmation) => {
         setConfirm(confirmation);
+        setCode('');
+        loaderModalRef.current.hide();
         otpModalRef.current.show();
       })
       .catch((e) => console.log(e));
@@ -59,7 +63,7 @@ const LoginScreen = () => {
             .doc(uid)
             .set(userInfor)
             .then(() => {
-              loaderModalRef.current.hide()
+              loaderModalRef.current.hide();
               navigation.navigate('SetupAccountScreen');
             });
         } else {
@@ -69,7 +73,7 @@ const LoginScreen = () => {
             .get()
             .then((res) => res.data())
             .then((data) => {
-              loaderModalRef.current.hide()
+              loaderModalRef.current.hide();
               if (data?.auth.isNewUser) {
                 navigation.navigate('SetupAccountScreen');
               } else {
@@ -78,9 +82,15 @@ const LoginScreen = () => {
             });
         }
       })
-      .catch((e) => console.log('Invalid code.'));
+      .catch((e) => {
+        loaderModalRef.current.hide();
+        Alert.alert('Invalid code.');
+      });
   }
 
+  navigation.addListener('beforeRemove', (e) => {
+    e.preventDefault();
+  });
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
