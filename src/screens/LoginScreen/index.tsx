@@ -20,77 +20,86 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from 'App';
 import { CallingCode, Country } from 'react-native-country-picker-modal';
 import CountryPicker from 'react-native-country-picker-modal';
-import ModalLoader, { LoaderModalRef } from '../../components/app-modal-loader';
+import Loader from '../../components/app-modal-loader';
 
 const LoginScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const otpModalRef = React.useRef() as React.MutableRefObject<OtpModalRef>;
-  const loaderModalRef = React.useRef() as React.MutableRefObject<LoaderModalRef>;
   const [countryName, setCountryName] = React.useState<Country['name']>('Vietnam');
   const [callingCode, setCallingCode] = React.useState<CallingCode>('84');
   const [countryPickerVisible, setCountryPickerVisible] = React.useState(false);
   const [phoneNumber, setPhoneNumber] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
   const [confirm, setConfirm] = React.useState<FirebaseAuthTypes.ConfirmationResult>();
   const [code, setCode] = React.useState('');
   const dispatch = useAppDispatch();
   const userInfor = useAppSelector((state) => state.userSlice);
 
-  async function signInWithPhoneNumber(phoneNumber: string) {
-    loaderModalRef.current.show();
+  const signInWithPhoneNumber = (phoneNumber: string) => {
+    setLoading(true);
     auth()
       .signInWithPhoneNumber(phoneNumber)
       .then((confirmation) => {
         setConfirm(confirmation);
         setCode('');
-        loaderModalRef.current.hide();
+        setLoading(false);
         otpModalRef.current.show();
       })
       .catch((e) => console.log(e));
-  }
+  };
 
-  async function confirmCode() {
-    loaderModalRef.current.show();
+  const createNewUserOnFirebase = (uid: string) => {
+    firestore()
+      .collection('user')
+      .doc(uid)
+      .set(userInfor)
+      .then(() => {
+        setLoading(false);
+        navigation.navigate('SetupAccountScreen');
+      });
+  };
+
+  const handleOldUserLogin = (uid: string) => {
+    firestore()
+      .collection('user')
+      .doc(uid)
+      .get()
+      .then((res) => res.data())
+      .then((data) => {
+        setLoading(false);
+        if (data?.auth.isNewUser) {
+          navigation.navigate('SetupAccountScreen');
+        } else {
+          navigation.navigate('Home');
+        }
+      });
+  };
+
+  const confirmCode = () => {
+    setLoading(true);
     confirm
       ?.confirm(code)
       .then((res) => {
         if (!res || !res.additionalUserInfo || !res.user) return;
         const uid = res.user.uid;
-        const isNewUser = res.additionalUserInfo.isNewUser;
         dispatch(setUserUid(uid));
+        const isNewUser = res.additionalUserInfo.isNewUser;
         if (isNewUser) {
-          firestore()
-            .collection('user')
-            .doc(uid)
-            .set(userInfor)
-            .then(() => {
-              loaderModalRef.current.hide();
-              navigation.navigate('SetupAccountScreen');
-            });
+          createNewUserOnFirebase(uid);
         } else {
-          firestore()
-            .collection('user')
-            .doc(uid)
-            .get()
-            .then((res) => res.data())
-            .then((data) => {
-              loaderModalRef.current.hide();
-              if (data?.auth.isNewUser) {
-                navigation.navigate('SetupAccountScreen');
-              } else {
-                navigation.navigate('Home');
-              }
-            });
+          handleOldUserLogin(uid);
         }
       })
       .catch((e) => {
-        loaderModalRef.current.hide();
+        setLoading(false);
         Alert.alert('Invalid code.');
       });
-  }
+  };
 
   navigation.addListener('beforeRemove', (e) => {
     e.preventDefault();
   });
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -168,7 +177,7 @@ const LoginScreen = () => {
         </View>
       </TouchableWithoutFeedback>
       <OtpModal ref={otpModalRef} code={code} setCode={setCode} confirmCode={confirmCode} />
-      <ModalLoader ref={loaderModalRef} size={'large'} color={'#1ED760'} />
+      {loading && <Loader size={'large'} color={'#1ED760'} />}
     </KeyboardAvoidingView>
   );
 };

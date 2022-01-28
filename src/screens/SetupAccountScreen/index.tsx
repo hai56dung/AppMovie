@@ -17,14 +17,16 @@ import { ImageLibraryOptions, launchCamera, launchImageLibrary } from 'react-nat
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useAppSelector } from '../../controller/store';
-import ModalLoader, { LoaderModalRef } from '../../components/app-modal-loader';
+import Loader from '../../components/app-modal-loader';
+
 const SetupAccountScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [photoUri, setPhotoUri] = React.useState('');
-  const loaderModalRef = React.useRef() as React.MutableRefObject<LoaderModalRef>;
+  const [loading, setLoading] = React.useState(false);
   const userInfor = useAppSelector((state) => state.userSlice);
+
   const pickupPhoto = () => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
@@ -39,9 +41,37 @@ const SetupAccountScreen = () => {
       }
     });
   };
+
+  const updateUserOnFirebase = () => {
+    setLoading(true);
+    firestore()
+      .collection('user')
+      .doc(userInfor.user.uid)
+      .get()
+      .then((res) => res.data())
+      .then((data) => {
+        const updateUser = {
+          user: {
+            ...data?.user,
+            name: lastName + '' + firstName,
+            photoUri,
+          },
+          auth: {
+            isNewUser: false,
+          },
+        };
+        firestore().collection('user').doc(userInfor.user.uid).update(updateUser);
+      })
+      .then(() => {
+        setLoading(false);
+        navigation.navigate('Home');
+      });
+  };
+
   navigation.addListener('beforeRemove', (e) => {
     auth().signOut();
   });
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -104,29 +134,7 @@ const SetupAccountScreen = () => {
               ]}
               onPress={() => {
                 if (firstName && lastName && photoUri) {
-                  loaderModalRef.current.show();
-                  firestore()
-                    .collection('user')
-                    .doc(userInfor.user.uid)
-                    .get()
-                    .then((res) => res.data())
-                    .then((data) => {
-                      const updateUser = {
-                        user: {
-                          ...data?.user,
-                          name: lastName + '' + firstName,
-                          photoUri,
-                        },
-                        auth: {
-                          isNewUser: false,
-                        },
-                      };
-                      firestore().collection('user').doc(userInfor.user.uid).update(updateUser);
-                    })
-                    .then(() => {
-                      loaderModalRef.current.hide();
-                      navigation.navigate('Home');
-                    });
+                  updateUserOnFirebase();
                 }
               }}>
               <Text
@@ -142,7 +150,7 @@ const SetupAccountScreen = () => {
           </View>
         </View>
       </TouchableWithoutFeedback>
-      <ModalLoader ref={loaderModalRef} size={'large'} color={'#1ED760'} />
+      {loading && <Loader size={'large'} color={'#1ED760'} />}
     </KeyboardAvoidingView>
   );
 };

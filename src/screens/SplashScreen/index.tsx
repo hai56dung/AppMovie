@@ -44,6 +44,7 @@ const SplashScreen = () => {
       navigation.navigate('LoginScreen');
     }
   }
+  
   return (
     <View style={styles.container}>
       <Text>Splash Screen</Text>

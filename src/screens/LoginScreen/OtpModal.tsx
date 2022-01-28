@@ -8,9 +8,11 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
+
 export type OtpModalRef = {
   show: () => void;
 };
+
 export type OtpModalProps = {
   code: string;
   setCode: React.Dispatch<React.SetStateAction<string>>;
@@ -20,6 +22,7 @@ interface ICode {
   inputRef: React.MutableRefObject<TextInput>;
   value: string;
 }
+
 const Code = ({ inputRef, value }: ICode) => {
   return (
     <TouchableOpacity
@@ -31,9 +34,11 @@ const Code = ({ inputRef, value }: ICode) => {
     </TouchableOpacity>
   );
 };
+
 const OtpModal = React.forwardRef<OtpModalRef, OtpModalProps>((props, ref) => {
   const [visible, setVisible] = React.useState(false);
   const inputRef = React.useRef() as React.MutableRefObject<TextInput>;
+  
   React.useImperativeHandle(ref, () => {
     return {
       show: () => {
@@ -41,6 +46,7 @@ const OtpModal = React.forwardRef<OtpModalRef, OtpModalProps>((props, ref) => {
       },
     };
   });
+  
   const formatCode = () => {
     let arr = props.code.split('');
     while (arr.length < 6) {
@@ -48,6 +54,7 @@ const OtpModal = React.forwardRef<OtpModalRef, OtpModalProps>((props, ref) => {
     }
     return arr;
   };
+
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <TouchableOpacity
