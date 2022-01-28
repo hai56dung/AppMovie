@@ -1,22 +1,27 @@
 import {
+  Animated,
+  Dimensions,
+  Keyboard,
   Modal,
   StyleSheet,
   Text,
   TextInput,
-  TextInputProps,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import React from 'react';
 
 export type OtpModalRef = {
   show: () => void;
+  hide: () => void;
 };
 
 export type OtpModalProps = {
   code: string;
   setCode: React.Dispatch<React.SetStateAction<string>>;
-  confirmCode: () => {};
+  confirmCode: () => void;
+  setAvoidView: React.Dispatch<React.SetStateAction<boolean>>;
 };
 interface ICode {
   inputRef: React.MutableRefObject<TextInput>;
@@ -34,84 +39,191 @@ const Code = ({ inputRef, value }: ICode) => {
     </TouchableOpacity>
   );
 };
-
-const OtpModal = React.forwardRef<OtpModalRef, OtpModalProps>((props, ref) => {
-  const [visible, setVisible] = React.useState(false);
-  const inputRef = React.useRef() as React.MutableRefObject<TextInput>;
-  
-  React.useImperativeHandle(ref, () => {
-    return {
-      show: () => {
-        setVisible(true);
-      },
-    };
-  });
-  
-  const formatCode = () => {
-    let arr = props.code.split('');
-    while (arr.length < 6) {
-      arr.push('');
-    }
-    return arr;
-  };
-
-  return (
-    <Modal visible={visible} transparent={true} animationType="slide">
-      <TouchableOpacity
-        style={styles.conntainer}
-        onPress={() => {
-          props.setCode('');
+const height = Dimensions.get('window').height;
+const OtpModal = React.forwardRef<OtpModalRef, OtpModalProps>(
+  ({ code, setCode, confirmCode, setAvoidView }, ref) => {
+    const [visible, setVisible] = React.useState(false);
+    const [keyboardShown, setKeyboardShown] = React.useState(false);
+    const [canPress, setCanPress] = React.useState(false);
+    const inputRef = React.useRef() as React.MutableRefObject<TextInput>;
+    const fadeAnim = React.useRef(new Animated.Value(0)).current;
+    const slideAnim = React.useRef(new Animated.Value(height)).current;
+    React.useImperativeHandle(ref, () => {
+      return {
+        show: () => {
+          setVisible(true);
+        },
+        hide: () => {
           setVisible(false);
+        },
+      };
+    });
+
+    const formatCode = () => {
+      let arr = code.split('');
+      while (arr.length < 6) {
+        arr.push('');
+      }
+      return arr;
+    };
+
+    const handleAnimatedIn = () => {
+      Animated.parallel(
+        [
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+        ],
+        {
+          stopTogether: false,
+        },
+      ).start();
+    };
+
+    const handleAnimatedOut = (time: number) => {
+      Animated.parallel(
+        [
+          Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: time,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: height,
+            duration: time,
+            useNativeDriver: true,
+          }),
+        ],
+        {
+          stopTogether: false,
+        },
+      ).start();
+    };
+
+    const close = () => {
+      const time = 200;
+      setTimeout(() => {
+        setVisible(false);
+      }, time);
+      handleAnimatedOut(time);
+      return time;
+    };
+
+    Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardShown(true);
+    });
+
+    Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardShown(false);
+    });
+
+    return (
+      <Modal
+        visible={visible}
+        transparent={true}
+        onRequestClose={() => {
+          setAvoidView(true);
+        }}
+        onShow={() => {
+          setCode('');
+          setAvoidView(false);
+          setCanPress(false);
+          handleAnimatedIn();
+        }}
+        onDismiss={() => {
+          setAvoidView(true);
         }}>
-        <View style={styles.modal}>
-          <View style={styles.codeContainer}>
-            {formatCode().map((item, index) => {
-              return <Code inputRef={inputRef} value={item} />;
-            })}
-          </View>
-          <TouchableOpacity
+        <TouchableWithoutFeedback
+          style={{ flex: 1 }}
+          onPress={(e) => {
+            if (e.target != e.currentTarget) return;
+            if (keyboardShown) {
+              Keyboard.dismiss();
+              return;
+            }
+            close();
+          }}>
+          <Animated.View
             style={[
-              styles.btn,
+              styles.container,
               {
-                backgroundColor: props.code.length == 6 ? '#1ED760' : '#EDEDED',
+                opacity: fadeAnim,
               },
-            ]}
-            onPress={() => {
-              if (props.code.length < 6) return;
-              setVisible(false);
-              props.confirmCode();
-            }}>
-            <Text
+            ]}>
+            <Animated.View
               style={[
-                styles.btnText,
+                styles.modal,
                 {
-                  color: props.code.length == 6 ? '#fff' : '#9f9f9f',
+                  transform: [
+                    {
+                      translateY: slideAnim,
+                    },
+                  ],
                 },
               ]}>
-              Submit
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <TextInput
-          style={{
-            opacity: 0,
-          }}
-          maxLength={6}
-          keyboardType="number-pad"
-          onChangeText={(value) => {
-            props.setCode(value);
-          }}
-          ref={inputRef}
-        />
-      </TouchableOpacity>
-    </Modal>
-  );
-});
+              <View style={styles.codeContainer}>
+                {formatCode().map((item, index) => {
+                  return <Code inputRef={inputRef} value={item} />;
+                })}
+              </View>
+              <TouchableOpacity
+                disabled={!canPress}
+                style={[
+                  styles.btn,
+                  {
+                    backgroundColor: canPress ? '#1ED760' : '#EDEDED',
+                  },
+                ]}
+                onPress={() => {
+                  setTimeout(confirmCode, close());
+                }}>
+                <Text
+                  style={[
+                    styles.btnText,
+                    {
+                      color: canPress ? '#fff' : '#9f9f9f',
+                    },
+                  ]}>
+                  Submit
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+            <TextInput
+              style={{
+                width: 0,
+                height: 0,
+                opacity: 0,
+              }}
+              maxLength={6}
+              keyboardType="number-pad"
+              onChangeText={(value) => {
+                if (value.length == 6) {
+                  setCanPress(true);
+                } else {
+                  setCanPress(false);
+                }
+                setCode(value);
+              }}
+              ref={inputRef}
+            />
+          </Animated.View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
+  },
+);
 
 export default OtpModal;
 
 const styles = StyleSheet.create({
-  conntainer: {
+  container: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 10,

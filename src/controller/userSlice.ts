@@ -1,4 +1,3 @@
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface IUserState {
@@ -30,10 +29,7 @@ const userSlice = createSlice({
     setUserUid: (state, action: PayloadAction<string>) => {
       state.user.uid = action.payload;
     },
-    setUserAuth: (state, action: PayloadAction<boolean>) => {
-      state.auth.isNewUser = action.payload;
-    },
-    setUserInfor: (state, action: PayloadAction<IUserState['user']>) => {
+    setCurrentUser: (state, action: PayloadAction<IUserState['user']>) => {
       state.user = action.payload;
     },
     setDefaultUser: (state) => {
@@ -44,6 +40,6 @@ const userSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setUserUid, setUserAuth, setUserInfor, setDefaultUser } = userSlice.actions;
+export const { setUserUid, setCurrentUser, setDefaultUser } = userSlice.actions;
 
 export default userSlice.reducer;

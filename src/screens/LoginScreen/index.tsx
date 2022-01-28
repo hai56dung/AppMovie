@@ -11,9 +11,9 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import OtpModal, { OtpModalRef } from './OtpModal';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import OtpModal, { OtpModalRef } from './OtpModal';
 import { useAppDispatch, useAppSelector } from '../../controller/store';
 import { setUserUid } from '../../controller/userSlice';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -30,6 +30,8 @@ const LoginScreen = () => {
   const [countryPickerVisible, setCountryPickerVisible] = React.useState(false);
   const [phoneNumber, setPhoneNumber] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [avoidView, setAvoidView] = React.useState(true);
+  const [canPress, setCanPress] = React.useState(false);
   const [confirm, setConfirm] = React.useState<FirebaseAuthTypes.ConfirmationResult>();
   const [code, setCode] = React.useState('');
   const dispatch = useAppDispatch();
@@ -41,11 +43,13 @@ const LoginScreen = () => {
       .signInWithPhoneNumber(phoneNumber)
       .then((confirmation) => {
         setConfirm(confirmation);
-        setCode('');
         setLoading(false);
         otpModalRef.current.show();
       })
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        setLoading(false);
+        Alert.alert('Try again', 'Invalid phone number');
+      });
   };
 
   const createNewUserOnFirebase = (uid: string) => {
@@ -92,7 +96,14 @@ const LoginScreen = () => {
       })
       .catch((e) => {
         setLoading(false);
-        Alert.alert('Invalid code.');
+        Alert.alert('Try again', 'Invalid code', [
+          {
+            text: 'ok',
+            onPress: () => {
+              otpModalRef.current.show();
+            },
+          },
+        ]);
       });
   };
 
@@ -102,6 +113,7 @@ const LoginScreen = () => {
 
   return (
     <KeyboardAvoidingView
+      enabled={avoidView}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -143,31 +155,36 @@ const LoginScreen = () => {
                 </View>
                 <TextInput
                   style={{ flex: 1, height: 40 }}
-                  maxLength={11}
+                  maxLength={10}
                   placeholder="123456789"
-                  keyboardType="phone-pad"
+                  keyboardType="number-pad"
                   onChangeText={(value) => {
+                    if (value.length < 9) {
+                      setCanPress(false);
+                    } else {
+                      setCanPress(true);
+                    }
                     setPhoneNumber(`+${callingCode}${value}`);
                   }}
                 />
               </View>
             </View>
             <TouchableOpacity
+              disabled={!canPress}
               style={[
                 styles.btn,
                 {
-                  backgroundColor: phoneNumber.length >= 11 ? '#1ED760' : '#EDEDED',
+                  backgroundColor: canPress ? '#1ED760' : '#EDEDED',
                 },
               ]}
               onPress={() => {
-                if (phoneNumber.length < 11) return;
                 signInWithPhoneNumber(phoneNumber);
               }}>
               <Text
                 style={[
                   styles.btnText,
                   {
-                    color: phoneNumber.length >= 11 ? '#FFF' : '#9f9f9f',
+                    color: canPress ? '#FFF' : '#9f9f9f',
                   },
                 ]}>
                 Request OTP
@@ -176,8 +193,14 @@ const LoginScreen = () => {
           </View>
         </View>
       </TouchableWithoutFeedback>
-      <OtpModal ref={otpModalRef} code={code} setCode={setCode} confirmCode={confirmCode} />
-      {loading && <Loader size={'large'} color={'#1ED760'} />}
+      <OtpModal
+        ref={otpModalRef}
+        code={code}
+        setCode={setCode}
+        confirmCode={confirmCode}
+        setAvoidView={setAvoidView}
+      />
+      <Loader size={'large'} color={'#1ED760'} loading={loading} />
     </KeyboardAvoidingView>
   );
 };

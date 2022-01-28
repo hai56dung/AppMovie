@@ -25,6 +25,7 @@ const SetupAccountScreen = () => {
   const [lastName, setLastName] = React.useState('');
   const [photoUri, setPhotoUri] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [canPress, setCanPress] = React.useState(false);
   const userInfor = useAppSelector((state) => state.userSlice);
 
   const pickupPhoto = () => {
@@ -71,6 +72,14 @@ const SetupAccountScreen = () => {
   navigation.addListener('beforeRemove', (e) => {
     auth().signOut();
   });
+
+  React.useEffect(() => {
+    if (photoUri && firstName && lastName) {
+      setCanPress(true);
+    } else {
+      setCanPress(false);
+    }
+  }, [photoUri, firstName, lastName]);
 
   return (
     <KeyboardAvoidingView
@@ -126,22 +135,21 @@ const SetupAccountScreen = () => {
               </View>
             </View>
             <TouchableOpacity
+              disabled={!canPress}
               style={[
                 styles.btn,
                 {
-                  backgroundColor: firstName && lastName && photoUri ? '#1ED760' : '#ededed',
+                  backgroundColor: canPress ? '#1ED760' : '#ededed',
                 },
               ]}
               onPress={() => {
-                if (firstName && lastName && photoUri) {
-                  updateUserOnFirebase();
-                }
+                updateUserOnFirebase();
               }}>
               <Text
                 style={[
                   styles.btnText,
                   {
-                    color: firstName && lastName && photoUri ? '#FFF' : '#9f9f9f',
+                    color: canPress ? '#FFF' : '#9f9f9f',
                   },
                 ]}>
                 Complete Setup
@@ -150,7 +158,7 @@ const SetupAccountScreen = () => {
           </View>
         </View>
       </TouchableWithoutFeedback>
-      {loading && <Loader size={'large'} color={'#1ED760'} />}
+      <Loader size={'large'} color={'#1ED760'} loading={loading} />
     </KeyboardAvoidingView>
   );
 };

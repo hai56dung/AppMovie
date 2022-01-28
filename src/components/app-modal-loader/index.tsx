@@ -3,11 +3,12 @@ import React from 'react';
 export interface ILoader {
   size: 'small' | 'large';
   color: ColorValue;
+  loading: boolean;
 }
 
-const Loader = ({ size, color }: ILoader) => {
+const Loader = React.memo(({ size, color, loading }: ILoader) => {
   return (
-    <Modal visible transparent={true}>
+    <Modal visible={loading} transparent={true}>
       <View style={styles.container}>
         <View style={styles.loaderContainer}>
           <ActivityIndicator size={size} color={color} />
@@ -15,7 +16,7 @@ const Loader = ({ size, color }: ILoader) => {
       </View>
     </Modal>
   );
-};
+});
 
 export default Loader;
 
