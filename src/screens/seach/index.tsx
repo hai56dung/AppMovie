@@ -9,44 +9,67 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import ResultVideos from '../ResultVideos';
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
+import { PropsSeachScreen } from 'App';
 
-const SeachScreen = ({ navigation }) => {
-  const [videos, setVideos] = useState([]);
+interface ResponseDataSearch {
+  id: { videoId: string };
+  snippet: {
+    title: string;
+    channelTitle: string;
+    thumbnails: {
+      high: {
+        url: string;
+      };
+    };
+  };
+}
+
+interface ResultSearch {
+  videoId: string;
+  title: string;
+  channelTitle: string;
+  url: string;
+}
+
+const result: ResultSearch[] = [];
+
+const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation }) => {
+  const [videos, setVideos] = useState<ResultSearch[]>([]);
   const [query, setQuery] = useState('');
 
   const handleSearchYouTube = async () => {
-    let res = await axios({
+    const res = await axios({
       method: 'GET',
       url: 'https://www.googleapis.com/youtube/v3/search',
       params: {
         part: 'snippet',
-        maxResults: '3',
-        key: 'AIzaSyD2GnEFOMzweuiOPk3eeG9Pyc7tIcaI5XI',
+        maxResults: 10,
+        key: 'AIzaSyAy5IfUp0iZvsv7qSigkmqgwzWsrw4rUTk',
         type: 'video',
         q: query,
       },
     });
 
     if (res && res.data && res.data.items) {
-      let raw = res.data.items;
-      let result = [];
+      const raw = res.data.items;
+
       if (raw && raw.length > 0) {
-        raw.map((item) => {
-          let object = {};
-          object.id = item.id.videoId;
-          object.title = item.snippet.title;
-          object.author = item.snippet.channelTitle;
-          object.imageId = item.snippet.thumbnails.high.url;
-          result.push(object);
+        raw.map(({ id, snippet }: ResponseDataSearch) => {
+          const { videoId } = id;
+          const { title, channelTitle, thumbnails } = snippet;
+
+          result.push({
+            videoId,
+            title,
+            channelTitle,
+            url: thumbnails.high.url,
+          });
         });
       }
       setVideos(result);
     }
-    console.log('dadsa', result);
   };
   return (
     <SafeAreaView>
@@ -55,7 +78,7 @@ const SeachScreen = ({ navigation }) => {
           <TextInput
             placeholder="Seach"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChangeText={(value: string) => setQuery(value)}
           />
         </View>
         <Button onPress={handleSearchYouTube} title="Tìm Kiếm" />
@@ -66,24 +89,23 @@ const SeachScreen = ({ navigation }) => {
               return (
                 <TouchableOpacity
                   onPress={() => {
-                    console.log(navigation);
                     navigation.navigate('ResultVideos', {
-                      itemId: item.id,
+                      videoId: item.videoId,
                       title: item.title,
-                      author: item.author,
+                      channelTitle: item.channelTitle,
                     });
                   }}
                   style={styles.cardVideo}
-                  key={item.id}>
+                  key={item.videoId}>
                   <View style={styles.left}>
-                    <Image style={styles.styleImgItem} source={{ uri: item.imageId }} />
+                    <Image style={styles.styleImgItem} source={{ uri: item.url }} />
                   </View>
                   <View style={styles.right}>
                     <View>
                       <Text style={styles.title}>{item.title}</Text>
                     </View>
                     <View>
-                      <Text style={styles.author}>{item.author}</Text>
+                      <Text style={styles.author}>{item.channelTitle}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>

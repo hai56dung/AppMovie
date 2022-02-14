@@ -6,10 +6,10 @@ const ResultVideos = ({ route }) => {
   return (
     <SafeAreaView style={styles.backGround}>
       <View>
-        <YouTubePlayer height={225} play={true} videoId={route.params.itemId} />
+        <YouTubePlayer height={225} play={true} videoId={route.params.videoId} />
         <View>
           <Text style={styles.title}>{route.params.title}</Text>
-          <Text style={styles.author}>{route.params.author}</Text>
+          <Text style={styles.author}>{route.params.channelTitle}</Text>
           <View style={styles.contentNumber}>
             <View style={styles.itemContentNumber}>
               <Text style={styles.numberLike}>40 K</Text>
