@@ -1,5 +1,4 @@
 import {
-  Button,
   Image,
   SafeAreaView,
   ScrollView,
@@ -35,7 +34,7 @@ interface ResultSearch {
 
 const result: ResultSearch[] = [];
 
-const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation }) => {
+const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation, route }) => {
   const [videos, setVideos] = useState<ResultSearch[]>([]);
   const [query, setQuery] = useState('');
 
@@ -71,17 +70,23 @@ const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation }) => {
       setVideos(result);
     }
   };
+
   return (
     <SafeAreaView>
       <View style={styles.backGround}>
-        <View style={styles.formInput}>
-          <TextInput
-            placeholder="Seach"
-            value={query}
-            onChangeText={(value: string) => setQuery(value)}
-          />
+        <View style={styles.comboIntBtn}>
+          <View style={styles.formInput}>
+            <TextInput
+              placeholder="Seach"
+              value={query}
+              onChangeText={(value: string) => setQuery(value)}
+            />
+          </View>
+          <Text style={styles.btnStyle} onPress={handleSearchYouTube}>
+            Tìm Kiếm
+          </Text>
         </View>
-        <Button onPress={handleSearchYouTube} title="Tìm Kiếm" />
+
         <ScrollView style={styles.body}>
           {videos &&
             videos.length > 0 &&
@@ -123,14 +128,21 @@ const styles = StyleSheet.create({
   backGround: {
     backgroundColor: 'black',
   },
-  styleTextInput: {
-    backgroundColor: 'while',
-    height: 40,
-    margin: 11,
-    padding: 10,
-    justifyContent: 'center',
-    borderRadius: 5,
+
+  comboIntBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
+
+  btnStyle: {
+    paddingLeft: 15,
+    paddingRight: 15,
+    paddingBottom: 12,
+    paddingTop: 12,
+    backgroundColor: 'gray',
+    borderRadius: 20,
+  },
+
   formInput: {
     height: 40,
     margin: 11,

@@ -14,6 +14,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SeachScreen from './src/screens/seach';
 import ResultVideos from './src/screens/ResultVideos';
+import SeachText from './src/screens/seach-text';
 
 export type RootStackList = {
   SeachScreen: undefined;
@@ -22,9 +23,13 @@ export type RootStackList = {
     title: string;
     channelTitle: string;
   };
+  SeachText: {
+    seach: string;
+  };
 };
 export type PropsSeachScreen = NativeStackScreenProps<RootStackList, 'SeachScreen'>;
 export type PropsResultVideos = NativeStackScreenProps<RootStackList, 'ResultVideos'>;
+export type PropsSeachText = NativeStackScreenProps<RootStackList, 'SeachText'>;
 
 const App = () => {
   const Stack = createNativeStackNavigator<RootStackList>();
@@ -33,6 +38,7 @@ const App = () => {
       <Stack.Navigator>
         <Stack.Screen name="SeachScreen" component={SeachScreen} />
         <Stack.Screen name="ResultVideos" component={ResultVideos} />
+        <Stack.Screen name="SeachText" component={SeachText} />
       </Stack.Navigator>
     </NavigationContainer>
   );

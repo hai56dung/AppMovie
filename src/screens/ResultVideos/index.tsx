@@ -2,7 +2,18 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import YouTubePlayer from 'react-native-youtube-iframe';
 
-const ResultVideos = ({ route }) => {
+interface resultsVideo {
+  route: {
+    params: {
+      videoId: string;
+      title: string;
+      channelTitle: string;
+      url: string;
+    };
+  };
+}
+
+const ResultVideos = ({ route }: resultsVideo) => {
   return (
     <SafeAreaView style={styles.backGround}>
       <View>
