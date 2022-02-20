@@ -6,7 +6,7 @@ import SplashScreen from './src/screens/SplashScreen';
 import { Provider } from 'react-redux';
 import store from './src/controller/store';
 import LoginScreen from './src/screens/LoginScreen';
-import HomeScreen from './src/screens/home';
+import HomeScreen from './src/screens/Home';
 import SetupAccountScreen from './src/screens/SetupAccountScreen';
 const Stack = createNativeStackNavigator();
 export type RootStackParamList = {

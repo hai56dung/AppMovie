@@ -170,7 +170,7 @@ const OtpModal = React.forwardRef<OtpModalRef, OtpModalProps>(
               ]}>
               <View style={styles.codeContainer}>
                 {formatCode().map((item, index) => {
-                  return <Code inputRef={inputRef} value={item} />;
+                  return <Code inputRef={inputRef} value={item} key={index}/>;
                 })}
               </View>
               <TouchableOpacity
