@@ -4,7 +4,6 @@ import HomeScreen from '../../nav/HomeScreen';
 import SearchScreen from '../../nav/SearchScreen';
 import LibraryScreen from '../../nav/LibraryScreen';
 import { Image } from 'react-native';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -23,6 +22,7 @@ const Home = () => {
           tabBarIcon: ({ color }) => {
             return <Image source={require('../../assets/icons/home/home.png')} style={{tintColor: color}} />;
           },
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -32,6 +32,7 @@ const Home = () => {
           tabBarIcon: ({color}) => {
             return <Image source={require('../../assets/icons/search/search.png')} style={{tintColor: color}}/>;
           },
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -41,6 +42,7 @@ const Home = () => {
           tabBarIcon: ({color}) => {
             return <Image source={require('../../assets/icons/library.png')} style={{tintColor: color}}/>;
           },
+          headerShown: false,
         }}
       />
     </Tab.Navigator>
