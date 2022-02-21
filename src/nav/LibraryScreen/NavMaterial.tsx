@@ -3,7 +3,6 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import Albums from '../../screens/Albums/Albums';
 import Artists from '../../screens/Artists/Artists';
 import Playlists from '../../screens/PlayLists/Playlists';
-import { View } from 'react-native';
 
 const Tab = createMaterialTopTabNavigator();
 
