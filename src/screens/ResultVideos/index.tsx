@@ -46,6 +46,7 @@ export default ResultVideos;
 const styles = StyleSheet.create({
   backGround: {
     backgroundColor: 'black',
+    flex: 1,
   },
   title: {
     color: 'white',
@@ -71,6 +72,7 @@ const styles = StyleSheet.create({
   },
   numberLike: {
     color: 'white',
+    fontSize: 20,
   },
   textLike: {
     color: 'white',
