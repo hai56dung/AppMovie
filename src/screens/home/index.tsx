@@ -4,6 +4,7 @@ import HomeScreen from '../../nav/HomeScreen';
 import SearchScreen from '../../nav/SearchScreen';
 import LibraryScreen from '../../nav/LibraryScreen';
 import { Image } from 'react-native';
+import SeachScreen from '../seach';
 
 const Tab = createBottomTabNavigator();
 
@@ -32,7 +33,7 @@ const Home = () => {
       />
       <Tab.Screen
         name="Search"
-        component={SearchScreen}
+        component={SeachScreen}
         options={{
           tabBarIcon: ({ color }) => {
             return (

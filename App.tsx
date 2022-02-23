@@ -13,7 +13,6 @@ import ProfileScreen from './src/screens/ProfileScreen/index';
 import SeachScreen from './src/screens/seach';
 import ResultVideos from './src/screens/ResultVideos';
 import SeachText from './src/screens/seach-text';
-import HomeScreen from './src/nav/HomeScreen';
 
 const Stack = createNativeStackNavigator();
 export type RootStackParamList = {
@@ -40,9 +39,8 @@ function App() {
           <Stack.Screen name="SplashScreen" component={SplashScreen} />
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
           <Stack.Screen name="SetupAccountScreen" component={SetupAccountScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen
             name="SeachScreen"
             component={SeachScreen}
