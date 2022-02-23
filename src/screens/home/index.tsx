@@ -5,7 +5,7 @@ const HomeScreen: React.FC = () => {
   return (
     <SafeAreaView>
       <View>
-        <Text>This is home screen</Text>
+        <Text>This is HomeScreen</Text>
       </View>
     </SafeAreaView>
   );

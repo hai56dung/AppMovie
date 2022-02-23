@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -8,8 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
 import axios from 'axios';
+import { useDebounce } from 'react-use';
+
 import { PropsSeachScreen } from 'App';
 
 interface ResponseDataSearch {
@@ -32,29 +34,28 @@ interface ResultSearch {
   url: string;
 }
 
-const result: ResultSearch[] = [];
-
-const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation, route }) => {
+const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation }) => {
   const [videos, setVideos] = useState<ResultSearch[]>([]);
-  const [query, setQuery] = useState('');
+  const [valueSearch, setValueSearch] = useState('');
 
-  const handleSearchYouTube = async () => {
-    const res = await axios({
-      method: 'GET',
-      url: 'https://www.googleapis.com/youtube/v3/search',
+  useDebounce(() => handleSearchYouTube(valueSearch), 1000, [valueSearch]);
+
+  const handleSearchYouTube = async (value: string) => {
+    const res = await axios.get('https://www.googleapis.com/youtube/v3/search', {
       params: {
         part: 'snippet',
         maxResults: 10,
         key: 'AIzaSyAy5IfUp0iZvsv7qSigkmqgwzWsrw4rUTk',
         type: 'video',
-        q: query,
+        q: value,
       },
     });
 
     if (res && res.data && res.data.items) {
       const raw = res.data.items;
-
       if (raw && raw.length > 0) {
+        const result: ResultSearch[] = [];
+
         raw.map(({ id, snippet }: ResponseDataSearch) => {
           const { videoId } = id;
           const { title, channelTitle, thumbnails } = snippet;
@@ -66,25 +67,23 @@ const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation, route }) => {
             url: thumbnails.high.url,
           });
         });
+
+        setVideos(result);
       }
-      setVideos(result);
     }
   };
 
   return (
-    <SafeAreaView>
-      <View style={styles.backGround}>
+    <SafeAreaView style={styles.container}>
+      <View>
         <View style={styles.comboIntBtn}>
           <View style={styles.formInput}>
             <TextInput
               placeholder="Seach"
-              value={query}
-              onChangeText={(value: string) => setQuery(value)}
+              value={valueSearch}
+              onChangeText={(value: string) => setValueSearch(value)}
             />
           </View>
-          <Text style={styles.btnStyle} onPress={handleSearchYouTube}>
-            Tìm Kiếm
-          </Text>
         </View>
 
         <ScrollView style={styles.body}>
@@ -125,7 +124,8 @@ const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation, route }) => {
 export default SeachScreen;
 
 const styles = StyleSheet.create({
-  backGround: {
+  container: {
+    flex: 1,
     backgroundColor: 'black',
   },
 
@@ -145,11 +145,11 @@ const styles = StyleSheet.create({
 
   formInput: {
     height: 40,
-    margin: 11,
-    justifyContent: 'center',
-    backgroundColor: '#FFF',
+    margin: 12,
+    backgroundColor: '#fff',
     borderRadius: 5,
     paddingHorizontal: 10,
+    flex: 1,
   },
   body: {
     marginTop: 10,

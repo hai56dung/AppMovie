@@ -36,9 +36,17 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="SeachScreen" component={SeachScreen} />
-        <Stack.Screen name="ResultVideos" component={ResultVideos} />
-        <Stack.Screen name="SeachText" component={SeachText} />
+        <Stack.Screen
+          name="SeachScreen"
+          component={SeachScreen}
+          options={{ headerShown: false, headerTransparent: true }}
+        />
+        <Stack.Screen
+          name="ResultVideos"
+          component={ResultVideos}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="SeachText" component={SeachText} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

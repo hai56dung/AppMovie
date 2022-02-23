@@ -74,15 +74,7 @@ const SeachText: React.FC<PropsSeachText> = (navigation) => {
             onChangeText={(text) => searchFilter(text)}
           />
         </View>
-        <Text
-          style={styles.btnStyle}
-          onPress={() => {
-            navigation.navigate('SeachScreen', {
-              seach: seach,
-            });
-          }}>
-          Tìm Kiếm
-        </Text>
+        <Text style={styles.btnStyle}>Tìm Kiếm</Text>
       </View>
       <FlatList
         data={filterdData}
