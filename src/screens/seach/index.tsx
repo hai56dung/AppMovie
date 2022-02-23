@@ -12,7 +12,8 @@ import {
 import axios from 'axios';
 import { useDebounce } from 'react-use';
 
-import { PropsSeachScreen } from 'App';
+import { RootStackParamList } from 'App';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 interface ResponseDataSearch {
   id: { videoId: string };
@@ -34,6 +35,7 @@ interface ResultSearch {
   url: string;
 }
 
+type PropsSeachScreen = NativeStackScreenProps<RootStackParamList, 'SeachScreen'>;
 const SeachScreen: React.FC<PropsSeachScreen> = ({ navigation }) => {
   const [videos, setVideos] = useState<ResultSearch[]>([]);
   const [valueSearch, setValueSearch] = useState('');
