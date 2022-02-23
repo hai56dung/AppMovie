@@ -15,7 +15,7 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import OtpModal, { OtpModalRef } from './OtpModal';
 import { useAppDispatch, useAppSelector } from '../../controller/store';
-import { setUserUid } from '../../controller/userSlice';
+import { setCurrentUser } from '../../controller/userSlice';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from 'App';
 import { CallingCode, Country } from 'react-native-country-picker-modal';
@@ -74,7 +74,14 @@ const LoginScreen = () => {
         if (data?.auth.isNewUser) {
           navigation.navigate('SetupAccountScreen');
         } else {
-          navigation.navigate('Home');
+          dispatch(
+            setCurrentUser({
+              ...userInfor.user,
+              name: data?.user.name,
+              photoUri: data?.user.photoUri,
+            }),
+          );
+          navigation.navigate('ProfileScreen');
         }
       });
   };
@@ -86,15 +93,16 @@ const LoginScreen = () => {
       .then((res) => {
         if (!res || !res.additionalUserInfo || !res.user) return;
         const uid = res.user.uid;
-        dispatch(setUserUid(uid));
         const isNewUser = res.additionalUserInfo.isNewUser;
         if (isNewUser) {
           createNewUserOnFirebase(uid);
         } else {
           handleOldUserLogin(uid);
         }
+        setConfirm(undefined);
       })
       .catch((e) => {
+        console.log(e);
         setLoading(false);
         Alert.alert('Try again', 'Invalid code', [
           {

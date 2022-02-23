@@ -8,12 +8,15 @@ import store from './src/controller/store';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/home';
 import SetupAccountScreen from './src/screens/SetupAccountScreen';
+import ProfileScreen from './src/screens/ProfileScreen/index';
+
 const Stack = createNativeStackNavigator();
 export type RootStackParamList = {
   SplashScreen: undefined;
   LoginScreen: undefined;
   SetupAccountScreen: undefined;
   Home: undefined;
+  ProfileScreen: undefined;
 };
 function App() {
   return (
@@ -27,6 +30,7 @@ function App() {
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
           <Stack.Screen name="SetupAccountScreen" component={SetupAccountScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

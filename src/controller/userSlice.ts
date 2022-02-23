@@ -26,9 +26,6 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUserUid: (state, action: PayloadAction<string>) => {
-      state.user.uid = action.payload;
-    },
     setCurrentUser: (state, action: PayloadAction<IUserState['user']>) => {
       state.user = action.payload;
     },
@@ -40,6 +37,6 @@ const userSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setUserUid, setCurrentUser, setDefaultUser } = userSlice.actions;
+export const { setCurrentUser, setDefaultUser } = userSlice.actions;
 
 export default userSlice.reducer;

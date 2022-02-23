@@ -5,12 +5,13 @@ import firestore from '@react-native-firebase/firestore';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from 'App';
 import { useAppDispatch, useAppSelector } from '../../controller/store';
-import { setUserUid } from '../../controller/userSlice';
+import { setCurrentUser } from '../../controller/userSlice';
 
 const SplashScreen = () => {
   // auth().signOut();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const dispatch = useAppDispatch();
+  const userInfor = useAppSelector((state) => state.userSlice);
   const [initializing, setInitializing] = React.useState(true);
   const [user, setUser] = React.useState<FirebaseAuthTypes.User | null>();
 
@@ -27,7 +28,6 @@ const SplashScreen = () => {
   if (!initializing) {
     if (user) {
       const uid = user.uid;
-      dispatch(setUserUid(uid));
       firestore()
         .collection('user')
         .doc(uid)
@@ -37,14 +37,23 @@ const SplashScreen = () => {
           if (data?.auth.isNewUser) {
             navigation.navigate('SetupAccountScreen');
           } else {
-            navigation.navigate('Home');
+            dispatch(
+              setCurrentUser({
+                ...userInfor.user,
+                name: data?.user.name,
+                photoUri: data?.user.photoUri,
+              }),
+            );
+            navigation.navigate('ProfileScreen');
           }
+          setUser(null);
+          setInitializing(true);
         });
     } else {
       navigation.navigate('LoginScreen');
     }
   }
-  
+
   return (
     <View style={styles.container}>
       <Text>Splash Screen</Text>
