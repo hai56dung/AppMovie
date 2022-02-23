@@ -6,7 +6,7 @@ import SplashScreen from './src/screens/SplashScreen';
 import { Provider } from 'react-redux';
 import store from './src/controller/store';
 import LoginScreen from './src/screens/LoginScreen';
-import HomeScreen from './src/screens/home';
+import Home from './src/screens/Home';
 import SetupAccountScreen from './src/screens/SetupAccountScreen';
 import ProfileScreen from './src/screens/ProfileScreen/index';
 
@@ -29,8 +29,12 @@ function App() {
           <Stack.Screen name="SplashScreen" component={SplashScreen} />
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
           <Stack.Screen name="SetupAccountScreen" component={SetupAccountScreen} />
+<<<<<<< HEAD
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+=======
+          <Stack.Screen name="Home" component={Home} />
+>>>>>>> 212057ddd81a0274c822cb964793854b0f4dd619
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>
